@@ -10,7 +10,7 @@ clear;
 
 % *Change this input* based on what you've named the base nifti after all
 % corrections.
-pe_dir = 'dwi_pa_4_gibbs';
+pe_dir = 'dwi_pa_gibbs';
 % This loads in each nifti metric, converts from character to 3D double
 % (y pixel by x pixel by number of slices) then reshapes into a single
 % vector of all values.
@@ -87,9 +87,9 @@ X=input(prompt);
 
 % Load in the corrected nifti file and separate out the B0 and B800 data
 % for one slice. Make sure you chose an appropriate slice. 
-dwi_nifti=load_nii(sprintf('dwi_pa_4.nii')); dwi_nifti=dwi_nifti.img;
-b0_data = dwi_nifti(:,:,16,1);
-b800_data = dwi_nifti(:,:,16,2);
+dwi_nifti=load_nii(sprintf('dwi_pa_11.nii')); dwi_nifti=dwi_nifti.img;
+b0_data = dwi_nifti(:,:,18,1);
+b800_data = dwi_nifti(:,:,18,2);
 
 % Display the B0 slice and draw a ROI on the tissue sample. This ROI is
 % then masked for both the B0 and B800 data.

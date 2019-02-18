@@ -14,7 +14,7 @@ md=load_nii(sprintf('%s_MD.nii',pe_dir));md=md.img;
 cl=load_nii(sprintf('%s_CL.nii',pe_dir));cl=cl.img;
 cp=load_nii(sprintf('%s_CP.nii',pe_dir));cp=cp.img;
 cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;
-dt=load_nii(sprintf('%s_DT.nii',pe_dir));dt=dt.img;
+%dt=load_nii(sprintf('%s_DT.nii',pe_dir));dt=dt.img;
 %adc=load_nii(sprintf('%s_ADCs.nii',pe_dir));adc=adc.img;
 
 %% Threshold components
@@ -23,16 +23,16 @@ cp_new= cp.*(cp>0.4);
 cl_new= cl.*(cl>0.4);
 fa_new= fa.*(fa>0.2);
 %fa_new=fa_new.*(fa_new<0.35);
-md_new= md.*(md>0.000);
+md_new= md.*(md>0.001);
 %% 
 % Overlay parameter maps on the original data. Careful of slice selection. 
 
-original = dt(:,:,30);
-fractional_anisotropy=fa_new(:,:,30);
-mean_diffusivity=md_new(:,:,30);
-planar_region2=cp_new(:,:,30);
-linear_region2=cl_new(:,:,30);
-spherical_region2=cs_new(:,:,30);
+%original = dt(:,:,18);
+% fractional_anisotropy=fa_new(:,:,18);
+% mean_diffusivity=md_new(:,:,18);
+% planar_region2=cp_new(:,:,18);
+% linear_region2=cl_new(:,:,18);
+% spherical_region2=cs_new(:,:,18);
 
 % C = imfuse(original, fractional_anisotropy, 'falsecolor', 'Colorchannels', [1 2 2]);
 % D = imfuse(original, mean_diffusivity, 'falsecolor', 'Colorchannels', [1 2 2]);
@@ -41,44 +41,44 @@ spherical_region2=cs_new(:,:,30);
 % G = imfuse(original, spherical_region2, 'falsecolor', 'Colorchannels', [1 2 2]);
 
 subplot(2,5,1)
-imshow(fa(:,:,30));
+imshow(fa(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('FA')
 
 subplot(2,5,2)
-imshow(md(:,:,30));
+imshow(md(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('MD')
 
 subplot(2,5,3)
-imshow(cs(:,:,30));
+imshow(cs(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('Spherical')
 
 subplot(2,5,4)
-imshow(cl(:,:,30));
+imshow(cl(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('Linear')
 
 subplot(2,5,5)
-imshow(cp(:,:,30));
+imshow(cp(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('Planar')
 
 subplot(2,5,6)
-imshow(fa_new(:,:,30));
+imshow(fa_new(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('FA > 0.2')
 
 subplot(2,5,7);
-imshow(md_new(:,:,30));
+imshow(md_new(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('MD > 0.003')
 
 subplot(2,5,8);
-imshow(cs_new(:,:,30));
+imshow(cs_new(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('Spherical > 0.4')
 
 subplot(2,5,9)
-imshow(cl_new(:,:,30));
+imshow(cl_new(:,:,53));
 set(gca,'xdir','reverse'); camroll(-90); title('Linear > 0.4')
 
 subplot(2,5,10)
-imshow(cp_new(:,:,30));
-set(gca,'xdir','reverse'); camroll(-90); title('Planar > 0.2')
+imshow(cp_new(:,:,53));
+set(gca,'xdir','reverse'); camroll(-90); title('Planar > 0.4')
 
 %%
 %overlay FA maps to see degree of anistropy

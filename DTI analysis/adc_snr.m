@@ -9,7 +9,7 @@ X=input(prompt);
 
 % load in the nifti files of the b0 and bX data
 % you need to unzip the .nii file!!
-dwi_nifti=load_nii(sprintf('dwi_pa.nii'));
+dwi_nifti=load_nii(sprintf('dwi_pa_4.nii'));
 dwi_nifti=dwi_nifti.img;
 b0_data = dwi_nifti(:,:,1,1);
 bX_data = dwi_nifti(:,:,1,2);
