@@ -10,7 +10,7 @@ clear;
 
 % *Change this input* based on what you've named the base nifti after all
 % corrections.
-pe_dir = 'dwi_pa_gibbs';
+pe_dir = 'masked_decell';
 % This loads in each nifti metric, converts from character to 3D double
 % (y pixel by x pixel by number of slices) then reshapes into a single
 % vector of all values.
@@ -24,7 +24,11 @@ cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;cs=reshape(cs,1,[]);
 % analysed.
 
 %% This section resizes and sorts the metrics.
-
+fa = nonzeros(fa);
+md = nonzeros(md);
+cl = nonzeros(cl);
+cp = nonzeros(cp);
+cs = nonzeros(cs);
 % Takes the metrics and based on the FA (which is assumed to
 % be masked for the desired regions) finds the non-zero terms, and
 % transposes a vector of the FA values in the masked region.
@@ -87,7 +91,7 @@ X=input(prompt);
 
 % Load in the corrected nifti file and separate out the B0 and B800 data
 % for one slice. Make sure you chose an appropriate slice. 
-dwi_nifti=load_nii(sprintf('dwi_pa_11.nii')); dwi_nifti=dwi_nifti.img;
+dwi_nifti=load_nii(sprintf('dwi_pa_4_reco.nii')); dwi_nifti=dwi_nifti.img;
 b0_data = dwi_nifti(:,:,18,1);
 b800_data = dwi_nifti(:,:,18,2);
 
