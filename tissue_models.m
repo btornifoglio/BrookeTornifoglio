@@ -2,19 +2,18 @@
 clear 
 clc
 % first data set
-pe_dir = 'masked_native';
-fa=load_nii(sprintf('%s_FA.nii',pe_dir));fa=fa.img;fa=reshape(fa,1,[]);
-md=load_nii(sprintf('%s_MD.nii',pe_dir));md=md.img;md=reshape(md,1,[]);
-cl=load_nii(sprintf('%s_CL.nii',pe_dir));cl=cl.img;cl=reshape(cl,1,[]);
-cp=load_nii(sprintf('%s_CP.nii',pe_dir));cp=cp.img;cp=reshape(cp,1,[]);
-cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;cs=reshape(cs,1,[]);
-%adc=load_nii(sprintf('%s_ADCs.nii',pe_dir));adc=adc.img;adc=reshape(adc,1,[]);
-l1=load_nii(sprintf('%s_L1.nii',pe_dir));l1=l1.img;l1=reshape(l1,1,[]);
-l2=load_nii(sprintf('%s_L2.nii',pe_dir));l2=l2.img;l2=reshape(l2,1,[]);
-l3=load_nii(sprintf('%s_L3.nii',pe_dir));l3=l3.img;l3=reshape(l3,1,[]);
-ra=load_nii(sprintf('%s_RA.nii',pe_dir));ra=ra.img;ra=reshape(ra,1,[]);
-rd=load_nii(sprintf('%s_RD.nii',pe_dir));rd=rd.img;rd=reshape(rd,1,[]);
-
+pe_dir = 'patch_cap';
+fa=load_nii(sprintf('%s_FA.nii',pe_dir));fa=fa.img;%fa=reshape(fa,1,[]);
+md=load_nii(sprintf('%s_MD.nii',pe_dir));md=md.img;%md=reshape(md,1,[]);
+cl=load_nii(sprintf('%s_CL.nii',pe_dir));cl=cl.img;%cl=reshape(cl,1,[]);
+cp=load_nii(sprintf('%s_CP.nii',pe_dir));cp=cp.img;%cp=reshape(cp,1,[]);
+cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;%cs=reshape(cs,1,[]);
+%adc=load_nii(sprintf('%s_ADCs.nii',pe_dir));adc=adc.img;%adc=reshape(adc,1,[]);
+l1=load_nii(sprintf('%s_L1.nii',pe_dir));l1=l1.img;%l1=reshape(l1,1,[]);
+l2=load_nii(sprintf('%s_L2.nii',pe_dir));l2=l2.img;%l2=reshape(l2,1,[]);
+l3=load_nii(sprintf('%s_L3.nii',pe_dir));l3=l3.img;%l3=reshape(l3,1,[]);
+ra=load_nii(sprintf('%s_RA.nii',pe_dir));ra=ra.img;%ra=reshape(ra,1,[]);
+rd=load_nii(sprintf('%s_RD.nii',pe_dir));rd=rd.img;%rd=reshape(rd,1,[]);
 %%
 % second data set 
 pe_dir = 'masked_decell';
@@ -61,149 +60,159 @@ ra_4=load_nii(sprintf('%s_RA.nii',pe_dir));ra_4=ra_4.img;ra_4=reshape(ra_4,1,[])
 rd_4=load_nii(sprintf('%s_RD.nii',pe_dir));rd_4=rd_4.img;rd_4=reshape(rd_4,1,[]);
 
 %% remove zeros to be left with only the parameters in masked area
-fa = nonzeros(fa);fa_2 = nonzeros(fa_2);fa_3 = nonzeros(fa_3);
-fa_4 = nonzeros(fa_4);
-md = nonzeros(md);md_2 = nonzeros(md_2);md_3 = nonzeros(md_3);
-md_4 = nonzeros(md_4);
-cl = nonzeros(cl);cl_2 = nonzeros(cl_2);cl_3 = nonzeros(cl_3);
-cl_4 = nonzeros(cl_4);
-cp = nonzeros(cp);cp_2 = nonzeros(cp_2);cp_3 = nonzeros(cp_3);
-cp_4 = nonzeros(cp_4);
-cs = nonzeros(cs);cs_2 = nonzeros(cs_2);cs_3 = nonzeros(cs_3);
-cs_4 = nonzeros(cs_4);
-l1 = nonzeros(l1);l1_2 = nonzeros(l1_2);l1_3 = nonzeros(l1_3);
-l1_4 = nonzeros(l1_4);
-l2 = nonzeros(l2);l2_2 = nonzeros(l2_2);l2_3 = nonzeros(l2_3);
-l2_4 = nonzeros(l2_4);
-l3 = nonzeros(l3);l3_2 = nonzeros(l3_2);l3_3 = nonzeros(l3_3);
-l3_4 = nonzeros(l3_4);
-ra = nonzeros(ra);ra_2 = nonzeros(ra_2);ra_3 = nonzeros(ra_3);
-ra_4 = nonzeros(ra_4);
-rd = nonzeros(rd);rd_2 = nonzeros(rd_2);rd_3 = nonzeros(rd_3);
-rd_4 = nonzeros(rd_4);
-
+fa = nonzeros(fa);%fa_2 = nonzeros(fa_2);fa_3 = nonzeros(fa_3);fa_4 = nonzeros(fa_4);
+md = nonzeros(md);%md_2 = nonzeros(md_2);md_3 = nonzeros(md_3);md_4 = nonzeros(md_4);
+cl = nonzeros(cl);%cl_2 = nonzeros(cl_2);cl_3 = nonzeros(cl_3);cl_4 = nonzeros(cl_4);
+cp = nonzeros(cp);%cp_2 = nonzeros(cp_2);cp_3 = nonzeros(cp_3);cp_4 = nonzeros(cp_4);
+cs = nonzeros(cs);%cs_2 = nonzeros(cs_2);cs_3 = nonzeros(cs_3);cs_4 = nonzeros(cs_4);
+l1 = nonzeros(l1);%l1_2 = nonzeros(l1_2);l1_3 = nonzeros(l1_3);l1_4 = nonzeros(l1_4);
+l2 = nonzeros(l2);%l2_2 = nonzeros(l2_2);l2_3 = nonzeros(l2_3);l2_4 = nonzeros(l2_4);
+l3 = nonzeros(l3);%l3_2 = nonzeros(l3_2);l3_3 = nonzeros(l3_3);l3_4 = nonzeros(l3_4);
+ra = nonzeros(ra);%ra_2 = nonzeros(ra_2);ra_3 = nonzeros(ra_3);ra_4 = nonzeros(ra_4);
+rd = nonzeros(rd);%rd_2 = nonzeros(rd_2);rd_3 = nonzeros(rd_3);rd_4 = nonzeros(rd_4);
+%adc = nonzeros(adc);
 %% histograms of two datasets
 % note which data set is original and data_2 when using the legend
 
+figure();
+histogram(fa,50,'Normalization','probability'); 
+% hold on 
+% histogram(fa_2,35,'Normalization', 'probability');
+% hold on
+% histogram(fa_3,35,'Normalization', 'probability');
+% hold on 
+% histogram(fa_4,35,'Normalization', 'probability');
+xlim([0 1]); ylim([0 0.05]);
+%legend('Plaque 22')
+title('FA');
 
 figure();
-histogram(fa,75,'Normalization','probability'); title('FA');
-hold on 
-histogram(fa_2,75,'Normalization', 'probability');
-hold on
-histogram(fa_3,75,'Normalization', 'probability');
-hold on 
-histogram(fa_4,75,'Normalization', 'probability');
-xlim([0 1]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+histogram(md,50,'Normalization','probability');
+% hold on
+% histogram(md_2,35,'Normalization','probability');
+% hold on
+% histogram(md_3,35,'Normalization','probability');
+% hold on
+% histogram(md_4,35,'Normalization','probability');
+xlim([0.0001 .002]); ylim([0 0.1]);
+%legend('Plaque 22')
+title('MD')
+
 
 figure();
-histogram(md,50,'Normalization','probability');title('MD')
-hold on
-histogram(md_2,50,'Normalization','probability');
-hold on
-histogram(md_3,50,'Normalization','probability');
-hold on
-histogram(md_4,50,'Normalization','probability');
+histogram(l1,50,'Normalization','probability');
+% hold on 
+% histogram(l1_2,50,'Normalization','probability');
+% hold on
+% histogram(l1_3,50,'Normalization','probability');
+% hold on
+% histogram(l1_4,50,'Normalization','probability');
 xlim([0.0001 .002]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+%legend('Plaque 22')
+title('L1')
 
 
 figure();
-histogram(l1,50,'Normalization','probability');title('L1')
-hold on 
-histogram(l1_2,50,'Normalization','probability');
-hold on
-histogram(l1_3,50,'Normalization','probability');
-hold on
-histogram(l1_4,50,'Normalization','probability');
+histogram(l2,50,'Normalization','probability');
+% hold on
+% histogram(l2_2,50,'Normalization','probability');
+% hold on
+% histogram(l2_3,50,'Normalization','probability');
+% hold on
+% histogram(l2_4,50,'Normalization','probability');
 xlim([0.0001 .002]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+%legend('Plaque 22')
+title('L2')
 
 
 figure();
-histogram(l2,50,'Normalization','probability');title('L2')
-hold on
-histogram(l2_2,50,'Normalization','probability');
-hold on
-histogram(l2_3,50,'Normalization','probability');
-hold on
-histogram(l2_4,50,'Normalization','probability');
+histogram(l3,50,'Normalization','probability');
+% hold on
+% histogram(l3_2,50,'Normalization','probability');
+% hold on
+% histogram(l3_3,50,'Normalization','probability');
+% hold on
+% histogram(l3_4,50,'Normalization','probability');
 xlim([0.0001 .002]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+%legend('Plaque 22')
+title('L3')
+
+figure();
+histogram(cl,50,'Normalization','probability');
+% hold on
+% histogram(cl_2,50,'Normalization','probability');
+% hold on
+% histogram(cl_3,50,'Normalization','probability');
+% hold on
+% histogram(cl_4,50,'Normalization','probability');
+xlim([0 1]); ylim([0 0.1]);
+%legend('Plaque 22')
+title(' CL')
 
 
 figure();
-histogram(l3,50,'Normalization','probability');title('L3')
-hold on
-histogram(l3_2,50,'Normalization','probability');
-hold on
-histogram(l3_3,50,'Normalization','probability');
-hold on
-histogram(l3_4,50,'Normalization','probability');
-xlim([0.0001 .002]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+histogram(cp,50,'Normalization','probability');
+% hold on
+% histogram(cp_2,50,'Normalization','probability');
+% hold on
+% histogram(cp_3,50,'Normalization','probability');
+% hold on
+% histogram(cp_4,50,'Normalization','probability');
+xlim([0 1]); ylim([0 0.1]);
+%legend('Plaque 22')
+title('CP')
 
 
 figure();
-histogram(cl,50,'Normalization','probability');title(' CL')
-hold on
-histogram(cl_2,50,'Normalization','probability');
-hold on
-histogram(cl_3,50,'Normalization','probability');
-hold on
-histogram(cl_4,50,'Normalization','probability');
-xlim([0 1]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+histogram(cs,50,'Normalization','probability');
+% hold on
+% histogram(cs_2,50,'Normalization','probability');
+% hold on
+% histogram(cs_3,50,'Normalization','probability');
+% hold on
+% histogram(cs_4,50,'Normalization','probability');
+xlim([0 1]); ylim([0 0.1]);
+%legend('Plaque 22')
+title('CS')
 
 
 figure();
-histogram(cp,50,'Normalization','probability');title('CP')
-hold on
-histogram(cp_2,50,'Normalization','probability');
-hold on
-histogram(cp_3,50,'Normalization','probability');
-hold on
-histogram(cp_4,50,'Normalization','probability');
-xlim([0 1]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
-
-
-figure();
-histogram(cs,50,'Normalization','probability');title('CS')
-hold on
-histogram(cs_2,50,'Normalization','probability');
-hold on
-histogram(cs_3,50,'Normalization','probability');
-hold on
-histogram(cs_4,50,'Normalization','probability');
-xlim([0 1]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
-
-
-figure();
-histogram(ra,50,'Normalization','probability');title('RA')
-hold on
-histogram(ra_2,50,'Normalization','probability');
-hold on
-histogram(ra_3,50,'Normalization','probability');
-hold on
-histogram(ra_4,50,'Normalization','probability');
+histogram(ra,50,'Normalization','probability');
+% hold on
+% histogram(ra_2,50,'Normalization','probability');
+% hold on
+% histogram(ra_3,50,'Normalization','probability');
+% hold on
+% histogram(ra_4,50,'Normalization','probability');
 xlim([0.01 01]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+%legend('Plaque 22')
+title('RA')
 
 
 figure();
-histogram(rd,50,'Normalization','probability');title('RD')
-hold on
-histogram(rd_2,50,'Normalization','probability');
-hold on
-histogram(rd_3,50,'Normalization','probability');
-hold on
-histogram(rd_4,50,'Normalization','probability');
+histogram(rd,50,'Normalization','probability');
+% hold on
+% histogram(rd_2,50,'Normalization','probability');
+% hold on
+% histogram(rd_3,50,'Normalization','probability');
+% hold on
+% histogram(rd_4,50,'Normalization','probability');
 xlim([0.0001 0.002]); 
-legend('Native', 'Decell', 'Elastase', 'Collagenase')
+%legend('Plaque 22')
+title('RD')
 
+
+figure();
+histogram(adc,100,'Normalization','probability');
+% hold on
+% histogram(rd_2,50,'Normalization','probability');
+% hold on
+% histogram(rd_3,50,'Normalization','probability');
+% hold on
+% histogram(rd_4,50,'Normalization','probability');
+xlim([0.0001 0.002]); 
+%legend('Plaque 22')
+title('ADC')
 %% table of means
 metrics = ['fa'; 'md'; 'ra'; 'rd'; 'cl'; 'cp'; 'cs'; 'l1'; 'l2'; 'l3'];
 
