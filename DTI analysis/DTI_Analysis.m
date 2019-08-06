@@ -10,12 +10,13 @@ clear;
 
 % *Change this input* based on what you've named the base nifti after all
 % corrections.
-pe_dir = 'masked_decell';
+pe_dir = 'LC';
 % This loads in each nifti metric, converts from character to 3D double
 % (y pixel by x pixel by number of slices) then reshapes into a single
 % vector of all values.
 fa=load_nii(sprintf('%s_FA.nii',pe_dir));fa=fa.img;fa=reshape(fa,1,[]);
 md=load_nii(sprintf('%s_MD.nii',pe_dir));md=md.img;md=reshape(md,1,[]);
+adc=load_nii(sprintf('%s_ADC.nii',pe_dir));adc=adc.img;adc=reshape(adc,1,[]);
 cl=load_nii(sprintf('%s_CL.nii',pe_dir));cl=cl.img;cl=reshape(cl,1,[]);
 cp=load_nii(sprintf('%s_CP.nii',pe_dir));cp=cp.img;cp=reshape(cp,1,[]);
 cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;cs=reshape(cs,1,[]);
@@ -26,14 +27,17 @@ cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;cs=reshape(cs,1,[]);
 %% This section resizes and sorts the metrics.
 fa = nonzeros(fa);
 md = nonzeros(md);
+%adc = nonzeros(adc);
 cl = nonzeros(cl);
 cp = nonzeros(cp);
 cs = nonzeros(cs);
+adc = nonzeros(adc);
 % Takes the metrics and based on the FA (which is assumed to
 % be masked for the desired regions) finds the non-zero terms, and
 % transposes a vector of the FA values in the masked region.
 i=find (fa>0 & fa <1);
 fa=fa(i);fa=fa';
+%adc=adc(i);adc=adc';
 cl=cl(i);cl=cl';
 cp=cp(i);cp=cp';
 cs=cs(i);cs=cs';
@@ -43,7 +47,7 @@ md=md(i);md=md';
 md(md>=3e-3)=3e-3;
 
 
-%% This section created histrograms of the distributions of each metric. 
+% This section created histrograms of the distributions of each metric. 
 
 figure
 subplot(2,3,1)
@@ -61,29 +65,36 @@ xlim([0 3e-3])
 subplot(2,3,5); ylim([0 .2])
 histogram(fa,50,'Normalization','probability');ylabel('VF');xlabel('FA')
 xlim([0 1]); ylim([0 .1])
+subplot(2,3,6)
+scatter(md, fa, 10,'x');ylabel('FA');xlabel('MD');
+grid on
+xlim([0 3e-3]); ylim([0 1])
+xticks([0.0004 0.0008]);yticks([.15 .3 .5]);
+save('metricsLC.mat','fa','md','cl','cp','cs')
 
 
+means = [mean(fa) mean(md) mean(adc)]';
+stds = [std(fa) std(md) std(adc)]';
 %% Generate westin shape diagram.
 
 % Uses an open source function for generating 3 seperate ternary plots.
-
-% A surface plot
-figure
+% A contour plot
+% figure
 d = linspace(0,1,length(cl)); 
-[hg,htick,hcb]=tersurf(cl,cp,cs,d);
+% [hg,htick,hcb]=tersurf(cl,cp,cs,d);
 
 % A contour plot
-figure;
-[h,hg,htick]=terplot;
-[h,c,hcb]=tercontour(cl,cp,cs,d);
+% figure;
+% [h,hg,htick]=terplot;
+% [h,c,hcb]=tercontour(cl,cp,cs,d);
 
 % A scatter plot (use this)
 figure;
 [h,hg,htick]=terplot;
+colormap(lines) %or diff colormap
 [hd,hcb]=ternaryc(cl,cp,cs,d,'.');
 hlabels=terlabel('Linear','Planar','Spherical');
 p(1).MarkerSize = 100;
-
 %% Calculate diffusion weighted signal to noise ratio
 
 prompt = 'What is the b value? ';
@@ -179,4 +190,3 @@ T = table(SNR_titles, b0_data, b800_data)
 % ADC_SVNR = 1/X * log(SVNR_b0/SVNR_bX); % seems off; wrong sign 
 % 
 % b0_bX_ratio = b0_SNR / bX_SNR;
-
