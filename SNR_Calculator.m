@@ -2,8 +2,8 @@ clear;clc;close all;
 
 dwi_nifti=load_nii(sprintf('dti.nii'));
 dwi_nifti=dwi_nifti.img;
-b0_data = dwi_nifti(:,:,3,1);
-bX_data = dwi_nifti(:,:,3,2);
+b0_data = dwi_nifti(:,:,35,1);
+bX_data = dwi_nifti(:,:,35,2);
 
 
 imshow(b0_data)
@@ -40,7 +40,7 @@ std_pbs_sb0 = std(double(pbs_b0));
 mean_pbs_sb800 = mean(pbs_b800);
 std_pbs_sb800 = std(double(pbs_b800));
 
-mean_noise_sb0 = mean(noise_b0);
+mean_noise_sb0 = mean(noise_b0);    
 std_noise_sb0 = std(double(noise_b0));
 mean_noise_sb800 = mean(noise_b800);
 std_noise_sb800 = std(double(noise_b800));
