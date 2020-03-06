@@ -12,8 +12,9 @@ if nargin<1
     number=11;
 end
 h=fill([0 1 0.5 0],[0 0 0.866 0],'w','linewidth',2);
-%set(h,'facecolor',[0.7 0.7 0.7],'edgecolor','w')
-%set(gcf,'color',[0 0 0.3])
+%set(h,'markerfacecolor','r','marker','+')
+set(h,'facecolor',[0.7 0.7 0.7],'edgecolor','w')
+set(gcf,'color',[0 0 0.3])
 d1=cos(pi/3);
 d2=sin(pi/3);
 l=linspace(0,1,number);

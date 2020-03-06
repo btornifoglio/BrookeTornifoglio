@@ -7,53 +7,51 @@
 
 clc;
 clear;
+close all 
 
-% *Change this input* based on what you've named the base nifti after all
-% corrections.
-pe_dir = 'LC';
+% *Change this input* based on what you've named the base nifti.
+pe_dir = 'D6';
 % This loads in each nifti metric, converts from character to 3D double
 % (y pixel by x pixel by number of slices) then reshapes into a single
 % vector of all values.
 fa=load_nii(sprintf('%s_FA.nii',pe_dir));fa=fa.img;fa=reshape(fa,1,[]);
 md=load_nii(sprintf('%s_MD.nii',pe_dir));md=md.img;md=reshape(md,1,[]);
-adc=load_nii(sprintf('%s_ADC.nii',pe_dir));adc=adc.img;adc=reshape(adc,1,[]);
+%adc=load_nii(sprintf('%s_ADCs.nii',pe_dir));adc=adc.img;adc=reshape(adc,1,[]);
 cl=load_nii(sprintf('%s_CL.nii',pe_dir));cl=cl.img;cl=reshape(cl,1,[]);
 cp=load_nii(sprintf('%s_CP.nii',pe_dir));cp=cp.img;cp=reshape(cp,1,[]);
 cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;cs=reshape(cs,1,[]);
 
-% ^ can add in ADC, RA, TA, etc. in same manner if other metrics to be
-% analysed.
+% ^ can add in RA, TA, etc. in same manner if other metrics to be analysed.
 
-%% This section resizes and sorts the metrics.
+%% Resizing and sorting the metrics
+
 fa = nonzeros(fa);
 md = nonzeros(md);
 %adc = nonzeros(adc);
 cl = nonzeros(cl);
 cp = nonzeros(cp);
 cs = nonzeros(cs);
-adc = nonzeros(adc);
+
 % Takes the metrics and based on the FA (which is assumed to
 % be masked for the desired regions) finds the non-zero terms, and
 % transposes a vector of the FA values in the masked region.
-i=find (fa>0 & fa <1);
+i=find (fa>0 & fa <1);  
 fa=fa(i);fa=fa';
-%adc=adc(i);adc=adc';
 cl=cl(i);cl=cl';
 cp=cp(i);cp=cp';
 cs=cs(i);cs=cs';
-
+%adc=adc(i);adc=adc';
 % The MD is thresholded 
 md=md(i);md=md';
 md(md>=3e-3)=3e-3;
 
-
-% This section created histrograms of the distributions of each metric. 
+%% Creating histrograms and FA vs. MD plot. 
 
 figure
 subplot(2,3,1)
 histogram(cl,50,'Normalization','probability');ylabel('VF');xlabel('C_L')
 xlim([0 1]); ylim([0 .15])
-subplot(2,3,2)
+subplot(2,3,2)  
 histogram(cs,50,'Normalization','probability');ylabel('VF');xlabel('C_S')
 xlim([0 1]); ylim([0 .15])
 subplot(2,3,3)
@@ -70,123 +68,83 @@ scatter(md, fa, 10,'x');ylabel('FA');xlabel('MD');
 grid on
 xlim([0 3e-3]); ylim([0 1])
 xticks([0.0004 0.0008]);yticks([.15 .3 .5]);
-save('metricsLC.mat','fa','md','cl','cp','cs')
+
+% All values are saved.
+%save('metrics_common.mat','fa','md','cl','cp','cs','adc')
+
+% Mean + std for metrics of interest for quick checks. 
+format long
+means = [mean(fa) mean(md) mean(cl) mean(cp) mean(cs)]';
+stds = [std(fa) std(md) std(cl) std(cp) std(cs)]';
 
 
-means = [mean(fa) mean(md) mean(adc)]';
-stds = [std(fa) std(md) std(adc)]';
-%% Generate westin shape diagram.
+%% Westin shape diagram.
 
 % Uses an open source function for generating 3 seperate ternary plots.
-% A contour plot
-% figure
+
 d = linspace(0,1,length(cl)); 
-% [hg,htick,hcb]=tersurf(cl,cp,cs,d);
 
-% A contour plot
-% figure;
-% [h,hg,htick]=terplot;
-% [h,c,hcb]=tercontour(cl,cp,cs,d);
-
-% A scatter plot (use this)
+% Scatter Westin Shape 
 figure;
 [h,hg,htick]=terplot;
 colormap(lines) %or diff colormap
 [hd,hcb]=ternaryc(cl,cp,cs,d,'.');
 hlabels=terlabel('Linear','Planar','Spherical');
 p(1).MarkerSize = 100;
-%% Calculate diffusion weighted signal to noise ratio
 
-prompt = 'What is the b value? ';
-X=input(prompt);
+%% Calculate SNR
 
-% Load in the corrected nifti file and separate out the B0 and B800 data
-% for one slice. Make sure you chose an appropriate slice. 
-dwi_nifti=load_nii(sprintf('dwi_pa_4_reco.nii')); dwi_nifti=dwi_nifti.img;
-b0_data = dwi_nifti(:,:,18,1);
-b800_data = dwi_nifti(:,:,18,2);
+clear;clc;close all;
 
-% Display the B0 slice and draw a ROI on the tissue sample. This ROI is
-% then masked for both the B0 and B800 data.
+% Change as needed to input the desired dataset.
+dwi_nifti=load_nii(sprintf('dti.nii'));
+dwi_nifti=dwi_nifti.img;
+b0_data = dwi_nifti(:,:,35,1);
+bX_data = dwi_nifti(:,:,35,2);
 
-% *this section needs work - currently no control (besides visual check) on
-% ROI being the same for each region*
-figure
-imshow(b0_data);
-title('Draw ROI on tissue')
-h = imrect(); % press enter to continue
-tissue_b0_mask = createMask(h);
-tissue_b0_mask = int32(tissue_b0_mask).*int32(b0_data);
-tissue_b800_mask = int32(tissue_b0_mask).*int32(b800_data);
-tissue_b0_values = tissue_b0_mask(tissue_b0_mask~=0);
-tissue_b800_values = tissue_b800_mask(tissue_b800_mask~=0);
+imshow(b0_data)
+title('Move ROI to tissue')
+h = imrect(gca, [2 4 2 4]);
+setResizable(h,0)
+position = wait(h);
+tissue_b0 = imcrop(b0_data,position);
+tissue_b800 = imcrop(bX_data,position);
 
-imshow(b0_data);
-title('Draw ROI in solution')
-h2 = imrect();
-solution_mask = createMask(h2);
-solution_b0_mask = int32(solution_mask).*int32(b0_data);
-solution_b800_mask = int32(solution_mask).*int32(b800_data);
-solution_b0_values = solution_b0_mask(solution_b0_mask~=0);
-solution_b800_values = solution_b800_mask(solution_b800_mask~=0);
+imshow(b0_data)
+title('Move ROI to PBS')
+h2 = imrect(gca, [2 4 2 4]);
+setResizable(h2,0)
+position2 = wait(h2);
+pbs_b0 = imcrop(b0_data,position2);
+pbs_b800 = imcrop(bX_data,position2);
 
-imshow(b0_data);
-title('Draw ROI in background')
-h3 = imrect();
-background_mask = createMask(h3);
-background_b0_mask = int32(background_mask).*int32(b0_data);
-background_b800_mask = int32(background_mask).*int32(b800_data);
-background_b0_values = background_b0_mask(background_b0_mask~=0);
-background_b800_values = background_b800_mask(background_b800_mask~=0);
+imshow(b0_data)
+title('Move ROI to noise')
+h3 = imrect(gca, [2 4 2 4]);
+setResizable(h3,0)
+position3 = wait(h3);
+noise_b0 = imcrop(b0_data,position3);
+noise_b800 = imcrop(bX_data,position3);
 
-% Calculate the average (within the ROI) and standard deviation of the 
-% signal in the b0 and b800 tissue, solution and background regions.
-b0_tissue_signal_ave = mean(tissue_b0_values);
-b0_tissue_signal_std = std(double(tissue_b0_values));
-b0_tissue_SNR = b0_tissue_signal_ave/b0_tissue_signal_std;
+mean_tissue_sb0 = mean(tissue_b0);
+std_tissue_sb0 = std(double(tissue_b0));
+mean_tissue_sb800 = mean(tissue_b800);
+std_tissue_sb800 = std(double(tissue_b800));
 
-b800_tissue_signal_ave = mean(tissue_b800_values);
-b800_tissue_signal_std = std(double(tissue_b800_values));
-b800_tissue_SNR = b800_tissue_signal_ave/b800_tissue_signal_std;
+mean_pbs_sb0 = mean(pbs_b0);
+std_pbs_sb0 = std(double(pbs_b0));
+mean_pbs_sb800 = mean(pbs_b800);
+std_pbs_sb800 = std(double(pbs_b800));
 
-b0_solution_signal_ave = mean(solution_b0_values);
-b0_solution_signal_std = std(double(solution_b0_values));
-b0_solution_SNR = b0_solution_signal_ave/b0_solution_signal_std;
+mean_noise_sb0 = mean(noise_b0);    
+std_noise_sb0 = std(double(noise_b0));
+mean_noise_sb800 = mean(noise_b800);
+std_noise_sb800 = std(double(noise_b800));
 
-b800_solution_signal_ave = mean(solution_b800_values);
-b800_solution_signal_std = std(double(solution_b800_values));
-b800_solution_SNR = b800_solution_signal_ave/b800_solution_signal_std;
+b0_SNR = mean_tissue_sb0/mean_noise_sb0;
+b800_SNR = mean_tissue_sb800/std_noise_sb800;
+DWI_SNR = b0_SNR/b800_SNR;
 
-b0_background_signal_ave = mean(background_b0_values);
-b0_background_signal_std = std(double(background_b0_values));
-b0_background_SNR = b0_background_signal_ave/b0_background_signal_std;
+T = table([b0_SNR; b800_SNR; DWI_SNR], 'VariableNames',...
+    {'SNR'},'RowNames', {'b0', 'bX','DWI'})
 
-b800_background_signal_ave = mean(background_b800_values);
-b800_background_signal_std = std(double(background_b800_values));
-b800_background_SNR = b800_background_signal_ave/b800_background_signal_std;
-
-% Calculate the standard ADC values for the tissue
-ADC_standard = 1/X * log(b0_tissue_signal_ave/b800_tissue_signal_ave);
-
-% Calculate the SNR with respect to the solution and with respect to the
-% background region
-b0_SNR_tissue_solution = b0_tissue_signal_ave/b0_solution_signal_std;
-b800_SNR_tissue_solution = b800_tissue_signal_ave/b800_solution_signal_std;
-
-b0_SNR_tissue_background = b0_tissue_signal_ave/b0_background_signal_std;
-b800_SNR_tissue_background = b800_tissue_signal_ave/b800_background_signal_std;
-
-% Display results of SNR calculations
-b0_data = [b0_tissue_SNR; b0_solution_SNR; b0_background_SNR];
-b800_data = [b800_tissue_SNR; b800_solution_SNR; b800_background_SNR];
-SNR_titles = {'Tissue'; 'Solution' ; 'Background'};
-T = table(SNR_titles, b0_data, b800_data)
-
-
-% % recalculate the ADC with respect to the signal value to noise ratio
-% SVNR_b0 = b0_SNR;
-% SVNR_bX = bX_SNR;
-% 
-% ADC_SVNR = 1/X * log(SVNR_b0/SVNR_bX); % seems off; wrong sign 
-% 
-% b0_bX_ratio = b0_SNR / bX_SNR;

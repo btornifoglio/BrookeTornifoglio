@@ -1,0 +1,361 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>DTI_Analysis</title><meta name="generator" content="MATLAB 9.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-08-06"><meta name="DC.source" content="DTI_Analysis.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">This code aims to analyze the metrics outputted from the DTI pipeline.</a></li><li><a href="#2">Resizing and sorting the metrics</a></li><li><a href="#3">Creating histrograms and FA vs. MD plot.</a></li><li><a href="#4">Westin shape diagram.</a></li><li><a href="#5">Calculate SNR</a></li></ul></div><h2 id="1">This code aims to analyze the metrics outputted from the DTI pipeline.</h2><p>Specifically: FA, MD, Cl, Cs, Cp, and westin shapes are visualised. SNR for DWI images is also calculated for the tissue, media, and background.</p><pre class="codeinput"><span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+
+clc;
+clear;
+close <span class="string">all</span>
+
+<span class="comment">% *Change this input* based on what you've named the base nifti.</span>
+pe_dir = <span class="string">'W'</span>;
+<span class="comment">% This loads in each nifti metric, converts from character to 3D double</span>
+<span class="comment">% (y pixel by x pixel by number of slices) then reshapes into a single</span>
+<span class="comment">% vector of all values.</span>
+fa=load_nii(sprintf(<span class="string">'%s_FA.nii'</span>,pe_dir));fa=fa.img;fa=reshape(fa,1,[]);
+md=load_nii(sprintf(<span class="string">'%s_MD.nii'</span>,pe_dir));md=md.img;md=reshape(md,1,[]);
+adc=load_nii(sprintf(<span class="string">'%s_ADC.nii'</span>,pe_dir));adc=adc.img;adc=reshape(adc,1,[]);
+cl=load_nii(sprintf(<span class="string">'%s_CL.nii'</span>,pe_dir));cl=cl.img;cl=reshape(cl,1,[]);
+cp=load_nii(sprintf(<span class="string">'%s_CP.nii'</span>,pe_dir));cp=cp.img;cp=reshape(cp,1,[]);
+cs=load_nii(sprintf(<span class="string">'%s_CS.nii'</span>,pe_dir));cs=cs.img;cs=reshape(cs,1,[]);
+
+<span class="comment">% ^ can add in RA, TA, etc. in same manner if other metrics to be analysed.</span>
+</pre><h2 id="2">Resizing and sorting the metrics</h2><pre class="codeinput">fa = nonzeros(fa);
+md = nonzeros(md);
+adc = nonzeros(adc);
+cl = nonzeros(cl);
+cp = nonzeros(cp);
+cs = nonzeros(cs);
+
+<span class="comment">% Takes the metrics and based on the FA (which is assumed to</span>
+<span class="comment">% be masked for the desired regions) finds the non-zero terms, and</span>
+<span class="comment">% transposes a vector of the FA values in the masked region.</span>
+i=find (fa&gt;0 &amp; fa &lt;1);
+fa=fa(i);fa=fa';
+cl=cl(i);cl=cl';
+cp=cp(i);cp=cp';
+cs=cs(i);cs=cs';
+
+<span class="comment">% The MD is thresholded</span>
+md=md(i);md=md';
+md(md&gt;=3e-3)=3e-3;
+</pre><h2 id="3">Creating histrograms and FA vs. MD plot.</h2><pre class="codeinput">figure
+subplot(2,3,1)
+histogram(cl,50,<span class="string">'Normalization'</span>,<span class="string">'probability'</span>);ylabel(<span class="string">'VF'</span>);xlabel(<span class="string">'C_L'</span>)
+xlim([0 1]); ylim([0 .15])
+subplot(2,3,2)
+histogram(cs,50,<span class="string">'Normalization'</span>,<span class="string">'probability'</span>);ylabel(<span class="string">'VF'</span>);xlabel(<span class="string">'C_S'</span>)
+xlim([0 1]); ylim([0 .15])
+subplot(2,3,3)
+histogram(cp,50,<span class="string">'Normalization'</span>,<span class="string">'probability'</span>);ylabel(<span class="string">'VF'</span>);xlabel(<span class="string">'C_P'</span>)
+xlim([0 1]); ylim([0 .15])
+subplot(2,3,4)
+histogram(md,50,<span class="string">'Normalization'</span>,<span class="string">'probability'</span>);ylabel(<span class="string">'VF'</span>);xlabel(<span class="string">'MD'</span>)
+xlim([0 3e-3])
+subplot(2,3,5); ylim([0 .2])
+histogram(fa,50,<span class="string">'Normalization'</span>,<span class="string">'probability'</span>);ylabel(<span class="string">'VF'</span>);xlabel(<span class="string">'FA'</span>)
+xlim([0 1]); ylim([0 .1])
+subplot(2,3,6)
+scatter(md, fa, 10,<span class="string">'x'</span>);ylabel(<span class="string">'FA'</span>);xlabel(<span class="string">'MD'</span>);
+grid <span class="string">on</span>
+xlim([0 3e-3]); ylim([0 1])
+xticks([0.0004 0.0008]);yticks([.15 .3 .5]);
+
+<span class="comment">% All values are saved.</span>
+save(<span class="string">'metricsW.mat'</span>,<span class="string">'fa'</span>,<span class="string">'md'</span>,<span class="string">'cl'</span>,<span class="string">'cp'</span>,<span class="string">'cs'</span>)
+
+<span class="comment">% Mean + std for metrics of interest for quick checks.</span>
+means = [mean(fa) mean(md) mean(adc)]';
+stds = [std(fa) std(md) std(adc)]';
+</pre><img vspace="5" hspace="5" src="DTI_Analysis_01.png" alt=""> <h2 id="4">Westin shape diagram.</h2><pre class="codeinput"><span class="comment">% Uses an open source function for generating 3 seperate ternary plots.</span>
+
+d = linspace(0,1,length(cl));
+
+<span class="comment">% Scatter Westin Shape</span>
+figure;
+[h,hg,htick]=terplot;
+colormap(lines) <span class="comment">%or diff colormap</span>
+[hd,hcb]=ternaryc(cl,cp,cs,d,<span class="string">'.'</span>);
+hlabels=terlabel(<span class="string">'Linear'</span>,<span class="string">'Planar'</span>,<span class="string">'Spherical'</span>);
+p(1).MarkerSize = 100;
+</pre><img vspace="5" hspace="5" src="DTI_Analysis_02.png" alt=""> <h2 id="5">Calculate SNR</h2><pre class="codeinput">clear;clc;close <span class="string">all</span>;
+
+<span class="comment">% Change as needed to input the desired dataset.</span>
+dwi_nifti=load_nii(sprintf(<span class="string">'dti.nii'</span>));
+dwi_nifti=dwi_nifti.img;
+b0_data = dwi_nifti(:,:,35,1);
+bX_data = dwi_nifti(:,:,35,2);
+
+imshow(b0_data)
+title(<span class="string">'Move ROI to tissue'</span>)
+h = imrect(gca, [2 4 2 4]);
+setResizable(h,0)
+position = wait(h);
+tissue_b0 = imcrop(b0_data,position);
+tissue_b800 = imcrop(bX_data,position);
+
+imshow(b0_data)
+title(<span class="string">'Move ROI to PBS'</span>)
+h2 = imrect(gca, [2 4 2 4]);
+setResizable(h2,0)
+position2 = wait(h2);
+pbs_b0 = imcrop(b0_data,position2);
+pbs_b800 = imcrop(bX_data,position2);
+
+imshow(b0_data)
+title(<span class="string">'Move ROI to noise'</span>)
+h3 = imrect(gca, [2 4 2 4]);
+setResizable(h3,0)
+position3 = wait(h3);
+noise_b0 = imcrop(b0_data,position3);
+noise_b800 = imcrop(bX_data,position3);
+
+mean_tissue_sb0 = mean(tissue_b0);
+std_tissue_sb0 = std(double(tissue_b0));
+mean_tissue_sb800 = mean(tissue_b800);
+std_tissue_sb800 = std(double(tissue_b800));
+
+mean_pbs_sb0 = mean(pbs_b0);
+std_pbs_sb0 = std(double(pbs_b0));
+mean_pbs_sb800 = mean(pbs_b800);
+std_pbs_sb800 = std(double(pbs_b800));
+
+mean_noise_sb0 = mean(noise_b0);
+std_noise_sb0 = std(double(noise_b0));
+mean_noise_sb800 = mean(noise_b800);
+std_noise_sb800 = std(double(noise_b800));
+
+b0_SNR = mean_tissue_sb0/mean_noise_sb0;
+b800_SNR = mean_tissue_sb800/std_noise_sb800;
+DWI_SNR = b0_SNR/b800_SNR;
+
+T = table([b0_SNR; b800_SNR; DWI_SNR], <span class="string">'VariableNames'</span>,<span class="keyword">...</span>
+    {<span class="string">'SNR'</span>},<span class="string">'RowNames'</span>, {<span class="string">'b0'</span>, <span class="string">'bX'</span>,<span class="string">'DWI'</span>})
+</pre><pre class="codeoutput">
+T =
+
+  3&times;1 table
+
+            SNR  
+           ______
+
+    b0     5.2089
+    bX     11.499
+    DWI     0.453
+
+</pre><img vspace="5" hspace="5" src="DTI_Analysis_03.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% This code aims to analyze the metrics outputted from the DTI pipeline. 
+% Specifically: FA, MD, Cl, Cs, Cp, and westin shapes are visualised. 
+% SNR for DWI images is also calculated for the tissue, media, and
+% background.
+
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
+clc;
+clear;
+close all 
+
+% *Change this input* based on what you've named the base nifti.
+pe_dir = 'W';
+% This loads in each nifti metric, converts from character to 3D double
+% (y pixel by x pixel by number of slices) then reshapes into a single
+% vector of all values.
+fa=load_nii(sprintf('%s_FA.nii',pe_dir));fa=fa.img;fa=reshape(fa,1,[]);
+md=load_nii(sprintf('%s_MD.nii',pe_dir));md=md.img;md=reshape(md,1,[]);
+adc=load_nii(sprintf('%s_ADC.nii',pe_dir));adc=adc.img;adc=reshape(adc,1,[]);
+cl=load_nii(sprintf('%s_CL.nii',pe_dir));cl=cl.img;cl=reshape(cl,1,[]);
+cp=load_nii(sprintf('%s_CP.nii',pe_dir));cp=cp.img;cp=reshape(cp,1,[]);
+cs=load_nii(sprintf('%s_CS.nii',pe_dir));cs=cs.img;cs=reshape(cs,1,[]);
+
+% ^ can add in RA, TA, etc. in same manner if other metrics to be analysed.
+
+%% Resizing and sorting the metrics
+
+fa = nonzeros(fa);
+md = nonzeros(md);
+adc = nonzeros(adc);
+cl = nonzeros(cl);
+cp = nonzeros(cp);
+cs = nonzeros(cs);
+
+% Takes the metrics and based on the FA (which is assumed to
+% be masked for the desired regions) finds the non-zero terms, and
+% transposes a vector of the FA values in the masked region.
+i=find (fa>0 & fa <1);
+fa=fa(i);fa=fa';
+cl=cl(i);cl=cl';
+cp=cp(i);cp=cp';
+cs=cs(i);cs=cs';
+
+% The MD is thresholded 
+md=md(i);md=md';
+md(md>=3e-3)=3e-3;
+
+%% Creating histrograms and FA vs. MD plot. 
+
+figure
+subplot(2,3,1)
+histogram(cl,50,'Normalization','probability');ylabel('VF');xlabel('C_L')
+xlim([0 1]); ylim([0 .15])
+subplot(2,3,2)
+histogram(cs,50,'Normalization','probability');ylabel('VF');xlabel('C_S')
+xlim([0 1]); ylim([0 .15])
+subplot(2,3,3)
+histogram(cp,50,'Normalization','probability');ylabel('VF');xlabel('C_P')
+xlim([0 1]); ylim([0 .15])
+subplot(2,3,4)
+histogram(md,50,'Normalization','probability');ylabel('VF');xlabel('MD')
+xlim([0 3e-3])
+subplot(2,3,5); ylim([0 .2])
+histogram(fa,50,'Normalization','probability');ylabel('VF');xlabel('FA')
+xlim([0 1]); ylim([0 .1])
+subplot(2,3,6)
+scatter(md, fa, 10,'x');ylabel('FA');xlabel('MD');
+grid on
+xlim([0 3e-3]); ylim([0 1])
+xticks([0.0004 0.0008]);yticks([.15 .3 .5]);
+
+% All values are saved.
+save('metricsW.mat','fa','md','cl','cp','cs')
+
+% Mean + std for metrics of interest for quick checks. 
+means = [mean(fa) mean(md) mean(adc)]';
+stds = [std(fa) std(md) std(adc)]';
+%% Westin shape diagram.
+
+% Uses an open source function for generating 3 seperate ternary plots.
+
+d = linspace(0,1,length(cl)); 
+
+% Scatter Westin Shape 
+figure;
+[h,hg,htick]=terplot;
+colormap(lines) %or diff colormap
+[hd,hcb]=ternaryc(cl,cp,cs,d,'.');
+hlabels=terlabel('Linear','Planar','Spherical');
+p(1).MarkerSize = 100;
+%% Calculate SNR
+
+clear;clc;close all;
+
+% Change as needed to input the desired dataset.
+dwi_nifti=load_nii(sprintf('dti.nii'));
+dwi_nifti=dwi_nifti.img;
+b0_data = dwi_nifti(:,:,35,1);
+bX_data = dwi_nifti(:,:,35,2);
+
+imshow(b0_data)
+title('Move ROI to tissue')
+h = imrect(gca, [2 4 2 4]);
+setResizable(h,0)
+position = wait(h);
+tissue_b0 = imcrop(b0_data,position);
+tissue_b800 = imcrop(bX_data,position);
+
+imshow(b0_data)
+title('Move ROI to PBS')
+h2 = imrect(gca, [2 4 2 4]);
+setResizable(h2,0)
+position2 = wait(h2);
+pbs_b0 = imcrop(b0_data,position2);
+pbs_b800 = imcrop(bX_data,position2);
+
+imshow(b0_data)
+title('Move ROI to noise')
+h3 = imrect(gca, [2 4 2 4]);
+setResizable(h3,0)
+position3 = wait(h3);
+noise_b0 = imcrop(b0_data,position3);
+noise_b800 = imcrop(bX_data,position3);
+
+mean_tissue_sb0 = mean(tissue_b0);
+std_tissue_sb0 = std(double(tissue_b0));
+mean_tissue_sb800 = mean(tissue_b800);
+std_tissue_sb800 = std(double(tissue_b800));
+
+mean_pbs_sb0 = mean(pbs_b0);
+std_pbs_sb0 = std(double(pbs_b0));
+mean_pbs_sb800 = mean(pbs_b800);
+std_pbs_sb800 = std(double(pbs_b800));
+
+mean_noise_sb0 = mean(noise_b0);    
+std_noise_sb0 = std(double(noise_b0));
+mean_noise_sb800 = mean(noise_b800);
+std_noise_sb800 = std(double(noise_b800));
+
+b0_SNR = mean_tissue_sb0/mean_noise_sb0;
+b800_SNR = mean_tissue_sb800/std_noise_sb800;
+DWI_SNR = b0_SNR/b800_SNR;
+
+T = table([b0_SNR; b800_SNR; DWI_SNR], 'VariableNames',...
+    {'SNR'},'RowNames', {'b0', 'bX','DWI'})
+
+
+##### SOURCE END #####
+--></body></html>

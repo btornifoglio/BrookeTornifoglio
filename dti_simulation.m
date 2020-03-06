@@ -1,22 +1,26 @@
 % Simulation of fractional anisotropy calculation in low SNR
 % Based on https://uk.mathworks.com/matlabcentral/fileexchange/21130-dti-and-fiber-tracking
 %% Alan Stone TCD 01/05/2019
-
-% gradient directions
+clear;clc;close all;
+% gradient directions based on unit vector 
 bdir = [0 0 0; 1 0 1; -1 0 1; 0 1 1; 0 1 -1; 1 1 0; -1 1 0];
 
 % b values
 bval = 800;
 
-% number of diffusion weighted volumes
+% number of diffusion weighted volumes (one less because of the b-0 image)
 nbdirs = size(bdir,1)-1;
 
-% simulate no attenuation with gradient application
+% simulate no attenuation with gradient application 
+%(noise - b0 mean is around the mean of the b-direction signal
+% - the signal does not change)
 s_dti_dataset1 = (ones(128,128,1,7) .* 150) + (randn(128,128,1,7) .* 50);
 
-% simulate attenuation with gradient application ... low SNR
+% simulate attenuation with gradient application ... low SNR (b0 mean is 
+% higher than the mean of the b-drections - i.e. the signal is attenuating)
+% only thing that is changing here is the attenuation of the b0
 s_dti_dataset2 = s_dti_dataset1;
-s_dti_dataset2(:,:,:,1) = (ones(128,128,1) .* 400) + randn(128,128,1)*50;
+s_dti_dataset2(:,:,:,1) = (ones(128,128,1) .* 450) + randn(128,128,1)*50;
 
 % make b matrices
 % (http://www.meteoreservice.com/PDFs/Mattiello97.pdf)
@@ -125,6 +129,13 @@ end
 % view
 figure,
 subplot(2,2,1), imshow(fa1(:,:,1),'displayrange',[0 1]), title('FA - No attenuation with gradient application')
-subplot(2,2,2), imshow(fa2(:,:,1),'displayrange',[0 1]), title('FA - Attenuation with gradient application ... low SNR')
+subplot(2,2,2), imshow(fa2(:,:,1),'displayrange',[0 1]), title('FA - Attenuation with gradient application ... SNR: 3')
 subplot(2,2,3), imshow(md1(:,:,1),'displayrange',[0 5e-3]), title('MD - No attenuation with gradient application')
-subplot(2,2,4), imshow(md2(:,:,1),'displayrange',[0 5e-3]), title('MD - Attenuation with gradient application ... low SNR')
+subplot(2,2,4), imshow(md2(:,:,1),'displayrange',[0 5e-3]), title('MD - Attenuation with gradient application ... SNR: 3')
+%%
+figure(), subplot(2,1,1), for i=1:7, plot(i,s_dti_dataset1(46,72,:,i),'o'), hold on, end
+md1(36, 45, 1);
+hold on, title(ans); ylim([0 500]), grid on
+subplot(2,1,2), for i=1:7, plot(i,s_dti_dataset2(46,72,:,i),'o'), hold on, end
+md2(36, 45, 1);
+hold on, title(ans); ylim([0 500]), grid on
